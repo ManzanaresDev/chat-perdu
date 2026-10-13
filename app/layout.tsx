@@ -5,8 +5,11 @@ import "./globals.css";
 const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL!),
+  metadataBase: new URL(siteUrl),
   title: { default: "Chat Perdu — Retrouvons-le ensemble", template: "%s | Chat Perdu" },
   description:
     "Déposez gratuitement une annonce pour votre chat perdu ou trouvé et diffusez-la autour de vous.",
