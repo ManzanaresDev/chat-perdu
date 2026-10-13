@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AdStatus {
+  PERDU      // propriétaire cherche son chat
+  TROUVE     // quelqu'un a trouvé un chat
+  RETROUVE   // dénouement heureux (chat rentré / restitué)
+  CLOS       // annonce fermée
+}
+
+enum ModerationStatus {
+  EN_ATTENTE
+  APPROUVEE
+  REFUSEE
+}
+
+enum Sex {
+  MALE
+  FEMELLE
+  INCONNU
+}
+
+model Ad {
+  id              String           @id @default(cuid())
+  status          AdStatus
+  moderation      ModerationStatus @default(EN_ATTENTE)
+
+  // Chat
+  catName         String?          // facultatif si "trouvé"
+  sex             Sex              @default(INCONNU)
+  color           String           // "tigré roux", "noir", etc.
+  ageApprox       String?          // "environ 3 ans"
+  isTattooed      Boolean          @default(false)
+  hasChip         Boolean          @default(false)
+  isCollared      Boolean          @default(false)
+  description     String           // signes distinctifs, caractère…
+
+  // Lieu et date
+  eventDate       DateTime         // date de disparition / découverte
+  city            String
+  postalCode      String
+  lat             Float?
+  lng             Float?
+  approxRadiusM   Int              @default(500) // on n'affiche jamais l'adresse exacte
+
+  // Contact (jamais exposé en clair sans action)
+  contactName     String
+  contactEmail    String
+  contactPhone    String?
+  showPhone       Boolean          @default(false)
+
+  // Gestion sans compte
+  manageTokenHash String           @unique
+
+  photos          Photo[]
+  reports         Report[]
+  messages        Message[]
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  resolvedAt      DateTime?
+
+  @@index([status, moderation, createdAt])
+  @@index([city])
+}
+
+model Photo {
+  id     String @id @default(cuid())
+  url    String
+  adId   String
+  ad     Ad     @relation(fields: [adId], references: [id], onDelete: Cascade)
+  order  Int    @default(0)
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  adId      String
+  ad        Ad       @relation(fields: [adId], references: [id], onDelete: Cascade)
+  fromName  String
+  fromEmail String
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model Report {
+  id        String   @id @default(cuid())
+  adId      String
+  ad        Ad       @relation(fields: [adId], references: [id], onDelete: Cascade)
+  reason    String
+  details   String?
+  createdAt DateTime @default(now())
+}
