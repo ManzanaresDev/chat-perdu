@@ -1,6 +1,5 @@
 // src/components/layout/Footer.tsx
 import Link from "next/link";
-import { cacheLife } from "next/cache";
 import clsx from "clsx";
 import { ShieldAlert, ExternalLink } from "lucide-react";
 
@@ -53,17 +52,6 @@ function LinkColumn({
       </ul>
     </nav>
   );
-}
-
-/**
- * Cache Components (Next 16) interdit `new Date()` pendant le prérendu.
- * On isole la date dans un composant mis en cache : l'année est calculée une fois,
- * incluse dans le HTML statique, puis recalculée au plus une fois par jour.
- */
-async function CurrentYear() {
-  "use cache";
-  cacheLife("days");
-  return <>{new Date().getFullYear()}</>;
 }
 
 export default function Footer({ withDock = true }: FooterProps) {
@@ -136,7 +124,7 @@ export default function Footer({ withDock = true }: FooterProps) {
 
         {/* Bas de page */}
         <div className="mt-14 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-cream-100/60 sm:flex-row sm:items-center sm:justify-between">
-          <p>© <CurrentYear /> Chat Perdu. Fait avec soin pour les chats et ceux qui les attendent.</p>
+<p>© {new Date().getFullYear()} Chat Perdu. Fait avec soin pour les chats et ceux qui les attendent.</p>
           <p>Cartes © contributeurs OpenStreetMap</p>
         </div>
       </div>

@@ -33,7 +33,7 @@ export default function Hero({
   const fitClass = isContain ? "object-contain" : "object-cover";
 
   return (
-    <section className="relative isolate flex min-h-dvh items-center justify-center overflow-hidden bg-night-950">
+<section className="relative isolate flex min-h-dvh items-center justify-center overflow-hidden py-16">
       {/* 1. Média de fond */}
       <div className="absolute inset-0 -z-20">
         {/* Fond flou : comble les bandes autour de l'image entière */}
@@ -123,7 +123,7 @@ export default function Hero({
         </p>
 
         <h1
-          className="animate-fade-up mt-4 font-display text-5xl leading-tight sm:text-6xl md:text-7xl"
+          className="animate-fade-up mt-4 font-display leading-tight text-4xl sm:text-6xl md:text-7xll"
           style={{ animationDelay: "0.15s" }}
         >
           Ramenons-le <em className="text-amber-glow not-italic">à la maison</em>
