@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  /* Couleurs */
+  --color-night-950: #0b1020;
+  --color-night-900: #121a33;
+  --color-night-800: #1c2747;
+  --color-amber-glow: #f6b84b;
+  --color-amber-deep: #d98a1c;
+  --color-cream-50: #fdf8ef;
+  --color-cream-100: #f7eddb;
+  --color-alert: #e5484d;
+  --color-ok: #3aa675;
+
+  /* Polices (définies via next/font dans layout.tsx) */
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* Animations */
+  --animate-kenburns: kenburns 28s ease-in-out infinite alternate;
+  --animate-fade-up: fade-up 0.9s ease-out both;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-ring: pulse-ring 2.4s ease-out infinite;
+
+  @keyframes kenburns {
+    0%   { transform: scale(1) translate3d(0, 0, 0); }
+    100% { transform: scale(1.12) translate3d(-2%, -1.5%, 0); }
+  }
+  @keyframes fade-up {
+    0%   { opacity: 0; transform: translateY(18px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+  }
+  @keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0 rgb(246 184 75 / 0.55); }
+    100% { box-shadow: 0 0 0 18px rgb(246 184 75 / 0); }
+  }
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--color-cream-50);
+  color: var(--color-night-900);
+  font-family: var(--font-sans);
+}
+
+/* Respect des préférences d'accessibilité */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
