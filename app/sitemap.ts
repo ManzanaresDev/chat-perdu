@@ -3,9 +3,7 @@ import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/site";
 import { prisma } from "@/lib/prisma";
 
-// Régénéré au plus une fois par heure : la base n'est pas interrogée
-// à chaque passage d'un robot (ménage le quota d'opérations du plan Free).
-export const revalidate = 3600;
+export const revalidate = 3600; // 1 h
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [

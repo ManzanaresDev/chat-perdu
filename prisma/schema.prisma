@@ -96,3 +96,12 @@ model Report {
   details   String?
   createdAt DateTime @default(now())
 }
+
+/// Compteurs pour la limitation de débit (remplace Upstash)
+model RateLimit {
+  key         String   @id
+  count       Int
+  windowStart DateTime
+
+  @@index([windowStart])
+}

@@ -1,6 +1,7 @@
+// app/api/upload/route.ts
 import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
-import { uploadLimiter } from "@/lib/ratelimit";
+import { checkUploadLimit } from "@/lib/ratelimit";
 import { getClientIp } from "@/lib/ip";
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5 Mo
@@ -8,8 +9,9 @@ const ALLOWED = ["image/jpeg", "image/png", "image/webp"];
 
 export async function POST(request: Request) {
   const ip = await getClientIp();
-  const { success } = await uploadLimiter.limit(ip);
-  if (!success) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
+  if (!(await checkUploadLimit(ip))) {
+    return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
+  }
 
   const form = await request.formData();
   const file = form.get("file");

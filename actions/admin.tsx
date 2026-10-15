@@ -8,8 +8,9 @@ import { sendApprovedEmail, sendRefusalEmail } from "@/lib/email";
 /** Revérifie le mot de passe Basic Auth dans l'action elle-même. */
 async function assertAdmin() {
   const auth = (await headers()).get("authorization");
-  const pass = auth?.startsWith("Basic ") ? atob(auth.slice(6)).split(":")[1] : undefined;
-  if (!process.env.ADMIN_PASSWORD || pass !== process.env.ADMIN_PASSWORD) {
+  const decoded = auth?.startsWith("Basic ") ? atob(auth.slice(6)) : "";
+  const pass = decoded.slice(decoded.indexOf(":") + 1);
+  if (!process.env.ADMIN_PASSWORD || !decoded.includes(":") || pass !== process.env.ADMIN_PASSWORD) {
     throw new Error("Non autorisé");
   }
 }

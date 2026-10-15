@@ -1,19 +1,30 @@
 "use server";
 
 import { z } from "zod";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { adSchema } from "@/lib/validators";
-import { adLimiter } from "@/lib/ratelimit";
-import { generateManageToken, hashToken } from "@/lib/tokens";
+import { checkAdLimit } from "@/lib/ratelimit";
+import { generateManageToken } from "@/lib/tokens";
 import { sendManageLinkEmail } from "@/lib/email";
+import { verifyTurnstile } from "@/lib/turnstile";
+import { getClientIp } from "@/lib/ip";
+import { blur } from "@/lib/utils";
 
-export async function createAd(formData: FormData, photoUrls: string[]) {
-  // 1. Rate limit
-  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0] ?? "unknown";
-  const { success } = await adLimiter.limit(ip);
-  if (!success) return { ok: false, error: "Trop de tentatives, réessayez plus tard." };
+export type ActionResult =
+  | { ok: true }
+  | { ok: false; error?: string; errors?: Record<string, string[] | undefined> };
+
+export async function createAd(formData: FormData, photoUrls: string[]): Promise<ActionResult> {
+  // 1. Rate limit + anti-bot
+  const ip = await getClientIp();
+  if (!(await checkAdLimit(ip))) {
+    return { ok: false, error: "Trop de tentatives, réessayez plus tard." };
+  }
+
+  if (!(await verifyTurnstile(formData.get("cf-turnstile-response"), ip))) {
+    return { ok: false, error: "Vérification anti-robot échouée, réessayez." };
+  }
 
   // 2. Validation
   // Un champ vide arrive en "" : on le convertit en undefined, sinon z.coerce.number()
@@ -34,12 +45,28 @@ export async function createAd(formData: FormData, photoUrls: string[]) {
   if (!parsed.success) {
     return { ok: false, errors: z.flattenError(parsed.error).fieldErrors };
   }
-  const { consent, website, ...data } = parsed.data;
+  const { consent, website, ...fields } = parsed.data;
   if (website) return { ok: true }; // bot silencieux
 
-  if (photoUrls.length < 1 || photoUrls.length > 4) {
+  // Seules les photos hébergées sur notre stockage Blob sont acceptées
+  const validPhotos = photoUrls.every((u) => {
+    try {
+      const { protocol, hostname } = new URL(u);
+      return protocol === "https:" && hostname.endsWith(".public.blob.vercel-storage.com");
+    } catch {
+      return false;
+    }
+  });
+  if (photoUrls.length < 1 || photoUrls.length > 4 || !validPhotos) {
     return { ok: false, error: "Ajoutez entre 1 et 4 photos." };
   }
+
+  // La position est floutée côté serveur (on ne fait jamais confiance au client)
+  const data = {
+    ...fields,
+    lat: fields.lat !== undefined ? blur(fields.lat) : undefined,
+    lng: fields.lng !== undefined ? blur(fields.lng) : undefined,
+  };
 
   // 3. Création
   const { token, hash } = generateManageToken();
@@ -54,15 +81,6 @@ export async function createAd(formData: FormData, photoUrls: string[]) {
   // 4. Email avec lien de gestion
   await sendManageLinkEmail(data.contactEmail, ad.id, token);
 
-  redirect(`/annonces/${ad.id}?cree=1`);
-}
-
-export async function markAsFound(token: string) {
-  const ad = await prisma.ad.findUnique({ where: { manageTokenHash: hashToken(token) } });
-  if (!ad) return { ok: false };
-  await prisma.ad.update({
-    where: { id: ad.id },
-    data: { status: "RETROUVE", resolvedAt: new Date() },
-  });
-  return { ok: true };
+  // L'annonce est EN_ATTENTE : elle n'est pas encore visible, on renvoie vers une page de confirmation.
+  redirect("/annonces/nouvelle/merci");
 }
