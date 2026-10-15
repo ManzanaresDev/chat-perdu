@@ -57,3 +57,15 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Impression (affiche) : voir section 17 */
+@page { size: A4; margin: 10mm; }
+@media print {
+  nav, footer { display: none !important; }
+}
+
+@page { size: A4; margin: 10mm; }
+@media print {
+  nav, footer { display: none !important; }
+}
+

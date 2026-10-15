@@ -1,4 +1,3 @@
-// src/components/layout/Footer.tsx
 import Link from "next/link";
 import clsx from "clsx";
 import { ShieldAlert, ExternalLink } from "lucide-react";
@@ -23,18 +22,12 @@ const LEGAL = [
 ];
 
 type FooterProps = {
-  /** Ajoute de l'espace en bas pour que le dock flottant ne masque pas le contenu.
+  /** Espace en bas pour que le dock flottant ne masque pas le contenu.
    *  À passer à `false` sur l'accueil, qui n'a pas de dock. */
   withDock?: boolean;
 };
 
-function LinkColumn({
-  title,
-  links,
-}: {
-  title: string;
-  links: { href: string; label: string }[];
-}) {
+function LinkColumn({ title, links }: { title: string; links: { href: string; label: string }[] }) {
   return (
     <nav aria-label={title}>
       <h2 className="font-display text-lg text-cream-50">{title}</h2>
@@ -56,12 +49,7 @@ function LinkColumn({
 
 export default function Footer({ withDock = true }: FooterProps) {
   return (
-    <footer
-      className={clsx(
-        "relative overflow-hidden bg-night-950 text-cream-100",
-        withDock ? "pb-28" : "pb-8"
-      )}
-    >
+    <footer className={clsx("relative overflow-hidden bg-night-950 text-cream-100", withDock ? "pb-28" : "pb-8")}>
       {/* Lueur ambrée : la lampe laissée allumée pour le chat qui rentre */}
       <div
         aria-hidden
@@ -76,9 +64,8 @@ export default function Footer({ withDock = true }: FooterProps) {
         >
           <ShieldAlert className="mt-0.5 size-5 shrink-0 text-amber-glow" aria-hidden />
           <p>
-            Ne versez jamais d'argent avant d'avoir retrouvé votre chat. Une personne qui
-            demande un paiement pour vous le rendre est très probablement un escroc : signalez
-            l'annonce avec le bouton « Signaler ».
+            Ne versez jamais d'argent avant d'avoir retrouvé votre chat. Une personne qui demande un paiement
+            pour vous le rendre est très probablement un escroc : signalez l'annonce avec le bouton « Signaler ».
           </p>
         </div>
 
@@ -93,8 +80,8 @@ export default function Footer({ withDock = true }: FooterProps) {
               Chat Perdu
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-cream-100/75">
-              Un tableau d'annonces gratuit pour signaler un chat perdu ou trouvé, et diffuser
-              l'information dans son quartier. Chaque partage compte.
+              Un tableau d'annonces gratuit pour signaler un chat perdu ou trouvé, et diffuser l'information
+              dans son quartier. Chaque partage compte.
             </p>
             <p className="mt-6 text-sm text-cream-100/75">
               Votre chat est pucé ou tatoué ? Vérifiez ses coordonnées sur{" "}
@@ -124,7 +111,7 @@ export default function Footer({ withDock = true }: FooterProps) {
 
         {/* Bas de page */}
         <div className="mt-14 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-cream-100/60 sm:flex-row sm:items-center sm:justify-between">
-<p>© {new Date().getFullYear()} Chat Perdu. Fait avec soin pour les chats et ceux qui les attendent.</p>
+          <p>© {new Date().getFullYear()} Chat Perdu. Fait avec soin pour les chats et ceux qui les attendent.</p>
           <p>Cartes © contributeurs OpenStreetMap</p>
         </div>
       </div>
