@@ -16,7 +16,7 @@ const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render
 
 export default function TurnstileWidget() {
   const ref = useRef<HTMLDivElement>(null);
-  const siteKey = process.env.TURNSTILE_SITE_KEY;
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   useEffect(() => {
     if (!siteKey || !ref.current) return;
