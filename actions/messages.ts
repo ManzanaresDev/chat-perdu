@@ -14,9 +14,10 @@ export async function sendMessage(formData: FormData): Promise<{ ok: boolean; er
     return { ok: false, error: "Trop de messages envoyés, réessayez plus tard." };
   }
 
-  if (!(await verifyTurnstile(formData.get("cf-turnstile-response"), ip))) {
-    return { ok: false, error: "Vérification anti-robot échouée, réessayez." };
-  }
+const captcha = await verifyTurnstile(formData.get("cf-turnstile-response"), ip);
+if (!captcha.ok) {
+  return { ok: false, error: `Vérification anti-robot échouée (${captcha.reason}), réessayez.` };
+}
 
   // Honeypot
   if (formData.get("website")) return { ok: true };

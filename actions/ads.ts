@@ -22,10 +22,10 @@ export async function createAd(formData: FormData, photoUrls: string[]): Promise
     return { ok: false, error: "Trop de tentatives, réessayez plus tard." };
   }
 
-  if (!(await verifyTurnstile(formData.get("cf-turnstile-response"), ip))) {
-    return { ok: false, error: "Vérification anti-robot échouée, réessayez." };
-  }
-
+const captcha = await verifyTurnstile(formData.get("cf-turnstile-response"), ip);
+if (!captcha.ok) {
+  return { ok: false, error: `Vérification anti-robot échouée (${captcha.reason}), réessayez.` };
+}
   // 2. Validation
   // Un champ vide arrive en "" : on le convertit en undefined, sinon z.coerce.number()
   // transformerait une position absente en 0 (lat = 0, lng = 0) et les champs optionnels
