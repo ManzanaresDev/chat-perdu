@@ -11,11 +11,7 @@ export const adSchema = z.object({
   isTattooed: z.boolean().default(false),
   hasChip: z.boolean().default(false),
   isCollared: z.boolean().default(false),
-  description: z
-    .string()
-    .trim()
-    .min(20, "Ajoutez quelques détails (20 caractères min.)")
-    .max(1500),
+   description: z.string().trim().min(3, "Décrivez brièvement le chat").max(1500),
   // La date est comparée au moment de la validation (et non au démarrage du serveur).
   // Tolérance de 24 h : une date « du jour » saisie dans un fuseau en avance sur UTC reste valide.
   eventDate: z.coerce
@@ -40,7 +36,7 @@ export type AdInput = z.infer<typeof adSchema>;
 /** Champs modifiables par le propriétaire via le lien de gestion. */
 export const adUpdateSchema = z.object({
   catName: z.string().trim().max(50).optional(),
-  description: z.string().trim().min(20, "20 caractères min.").max(1500),
+   description: z.string().trim().min(3, "Décrivez brièvement le chat").max(1500),
   contactPhone: z.string().trim().max(20).optional(),
   showPhone: z.boolean().default(false),
 });

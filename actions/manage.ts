@@ -67,7 +67,7 @@ export async function updateAd(token: string, formData: FormData): Promise<Actio
   );
   const parsed = adUpdateSchema.safeParse({ ...raw, showPhone: formData.get("showPhone") === "on" });
   if (!parsed.success) {
-    return { ok: false, error: "Vérifiez les champs (description de 20 caractères minimum)." };
+return { ok: false, error: "Vérifiez les champs (la description ne peut pas être vide)." };
   }
 
   await prisma.ad.update({

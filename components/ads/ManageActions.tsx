@@ -74,7 +74,7 @@ export default function ManageActions({ token, status, defaults }: Props) {
           <div>
             <label htmlFor="description" className="block text-sm font-medium">Description</label>
             <textarea id="description" name="description" defaultValue={defaults.description}
-              required minLength={20} maxLength={1500} rows={6} className={input} />
+              required minLength={3} maxLength={1500} rows={6} className={input} />
           </div>
           <div>
             <label htmlFor="contactPhone" className="block text-sm font-medium">Téléphone</label>
