@@ -2,11 +2,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
-    ],
-  },
+images: {
+  // Autorise les adresses non classiques (NAT64, IPv6) uniquement en local
+  dangerouslyAllowLocalIP: process.env.NODE_ENV === "development",
+  remotePatterns: [
+    { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
+  ],
+},
   turbopack: {
     rules: {
       "*.css": {

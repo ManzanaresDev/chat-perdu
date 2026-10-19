@@ -9,13 +9,15 @@ import LocationPicker from "@/components/map/LocationPickerDynamic";
 import type { PickedLocation } from "@/components/map/LocationPicker";
 import TurnstileWidget from "@/components/security/TurnstileWidget";
 import { DRAFT_KEY } from "@/lib/utils";
+import { ZONE, isInZone } from "@/lib/zone";
 
 const STEPS = ["Situation", "Le chat", "Photos", "Contact"] as const;
 const LAST = STEPS.length - 1;
 
 // Étape contenant chaque champ (pour revenir sur l'étape fautive après une erreur serveur)
+// La ville et le code postal ne sont plus saisis : le serveur les fixe d'après ZONE.
 const STEP_OF: Record<string, number> = {
-  status: 0, eventDate: 0, city: 0, postalCode: 0, lat: 0, lng: 0,
+  status: 0, eventDate: 0, lat: 0, lng: 0,
   catName: 1, color: 1, sex: 1, ageApprox: 1, description: 1,
   contactName: 3, contactEmail: 3, contactPhone: 3, consent: 3,
 };
@@ -124,7 +126,8 @@ export default function AdForm() {
           }
         }
         setPhotos(Array.isArray(d.photos) ? d.photos : []);
-        setPosition(d.position ?? null);
+        // Un brouillon ancien peut contenir une position hors zone : on l'ignore
+        setPosition(d.position && isInZone(d.position.lat, d.position.lng) ? d.position : null);
         setStep(Math.min(Math.max(d.step ?? 0, 0), LAST));
       }
     } catch {
@@ -153,9 +156,15 @@ export default function AdForm() {
         return false;
       }
     }
-    if (n === 0 && !position) {
-      setFormError("Indiquez où le chat a été vu pour la dernière fois (clic sur la carte ou recherche d'adresse).");
-      return false;
+    if (n === 0) {
+      if (!position) {
+        setFormError("Indiquez où le chat a été vu pour la dernière fois (clic sur la carte ou recherche d'adresse).");
+        return false;
+      }
+      if (!isInZone(position.lat, position.lng)) {
+        setFormError(`Les annonces sont réservées à ${ZONE.label}.`);
+        return false;
+      }
     }
     if (n === 2 && photos.length < 1) {
       setFormError("Ajoutez au moins une photo.");
@@ -261,34 +270,14 @@ export default function AdForm() {
         <div>
           <p className="block text-sm font-medium">Où ? <span className="font-normal text-night-800/60">(dernier lieu connu)</span></p>
           <p className="mb-2 text-xs text-night-800/60">
-            Cherchez une adresse ou une ville, ou cliquez sur la carte. La position sera floutée (≈ 100 m) avant publication.
+            Annonces réservées à {ZONE.label}. Cherchez une rue ou cliquez sur la carte. La position sera floutée (≈ 100 m) avant publication.
           </p>
           <LocationPicker
             value={position}
             onChange={(p) => { setPosition(p); setFormError(null); }}
-            onAddress={({ city, postcode }) => {
-              const set = (name: string, value: string) => {
-                const el = formRef.current?.elements.namedItem(name);
-                if (el instanceof HTMLInputElement && value) el.value = value;
-              };
-              set("city", city);
-              set("postalCode", postcode);
-              saveDraft();
-            }}
           />
           <input type="hidden" name="lat" value={position?.lat ?? ""} />
           <input type="hidden" name="lng" value={position?.lng ?? ""} />
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
-          <Field label="Ville" name="city" error={err("city")}>
-            <input id="city" name="city" required minLength={2} maxLength={80} autoComplete="address-level2"
-              aria-describedby={describedBy("city")} className={input} />
-          </Field>
-          <Field label="Code postal" name="postalCode" error={err("postalCode")}>
-            <input id="postalCode" name="postalCode" required inputMode="numeric" pattern="\d{5}" maxLength={5}
-              autoComplete="postal-code" aria-describedby={describedBy("postalCode")} className={input} />
-          </Field>
         </div>
       </fieldset>
 

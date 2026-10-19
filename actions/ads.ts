@@ -10,6 +10,7 @@ import { sendManageLinkEmail } from "@/lib/email";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { getClientIp } from "@/lib/ip";
 import { blur } from "@/lib/utils";
+import { ZONE, isInZone } from "@/lib/zone";
 
 export type ActionResult =
   | { ok: true }
@@ -48,6 +49,17 @@ if (!captcha.ok) {
   const { consent, website, ...fields } = parsed.data;
   if (website) return { ok: true }; // bot silencieux
 
+    // Zone : la position est obligatoire et doit être dans Malo-les-Bains
+  const { lat, lng } = fields;
+  if (lat === undefined || lng === undefined || !isInZone(lat, lng)) {
+    return {
+      ok: false,
+      error: `Les annonces sont réservées à ${ZONE.label}. Placez le point sur la carte dans cette zone.`,
+      errors: { lat: ["Position hors zone"] },
+    };
+  }
+
+
   // Seules les photos hébergées sur notre stockage Blob sont acceptées
   const validPhotos = photoUrls.every((u) => {
     try {
@@ -64,8 +76,10 @@ if (!captcha.ok) {
   // La position est floutée côté serveur (on ne fait jamais confiance au client)
   const data = {
     ...fields,
-    lat: fields.lat !== undefined ? blur(fields.lat) : undefined,
-    lng: fields.lng !== undefined ? blur(fields.lng) : undefined,
+    city: ZONE.city,
+    postalCode: ZONE.postalCode,
+    lat: blur(lat),
+    lng: blur(lng),
   };
 
   // 3. Création

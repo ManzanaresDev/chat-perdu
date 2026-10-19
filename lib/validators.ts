@@ -24,8 +24,6 @@ export const adSchema = z.object({
       (d) => d.getTime() <= Date.now() + 24 * 60 * 60 * 1000,
       "La date ne peut pas être dans le futur"
     ),
-  city: z.string().trim().min(2).max(80),
-  postalCode: z.string().regex(/^\d{5}$/, "Code postal à 5 chiffres"),
   lat: z.coerce.number().min(-90).max(90).optional(),
   lng: z.coerce.number().min(-180).max(180).optional(),
   contactName: z.string().trim().min(2).max(80),
